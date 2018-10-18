@@ -1,6 +1,7 @@
 local ipairs, tonumber, tostring, type = ipairs, tonumber, tostring, type
 local bit        = require("bit")
 local lshift     = bit.lshift
+local rshift     = bit.rshift
 local band       = bit.band
 local bor        = bit.bor
 local xor        = bit.bxor
@@ -125,6 +126,28 @@ local function ip2bin(ip)
     return bin_ip, bin_octets
 end
 _M.ip2bin = ip2bin
+
+
+local function bin2ip(bin)
+    if lrucache then
+        local get = lrucache:get(bin)
+        if get then
+            return get
+        end
+    end
+
+    local ip = {}
+    ip[1] = rshift(bin, 24)
+    ip[2] = rshift(lshift(bin, 8), 24)
+    ip[3] = rshift(lshift(bin, 16), 24)
+    ip[4] = rshift(lshift(bin, 24), 24)
+
+    if lrucache then
+        lrucache:set(bin, ip)
+    end
+    return ip
+end
+_M.bin2ip = bin2ip
 
 
 local function split_cidr(input)
